@@ -1,0 +1,343 @@
+openapi: 3.1.0
+
+info:
+  title: Bloco Sambará API
+  version: 0.1.0
+  description: |
+    API REST de Bloco Sambará — gestión de escuelas de batucada multi-tenant.
+
+    El backend está construido sobre [Supabase](https://supabase.com), que expone:
+    - **Auth API** (`/auth/v1/*`): registro, login, refresh, logout
+    - **REST API** (`/rest/v1/*`): generada automáticamente por [PostgREST](https://postgrest.org/)
+      sobre las tablas de Postgres, con RLS aplicando los permisos
+
+    ### Autenticación
+    Todas las rutas (excepto `/auth/v1/signup` y `/auth/v1/token`) requieren un header
+    `Authorization: Bearer <jwt>` con el token devuelto por login. Además, todas las
+    requests a Supabase REST llevan también el header `apikey: <anon_key>`.
+
+    ### Multi-tenant
+    Cada usuario está vinculado a un tenant (escuela). Las RLS policies aseguran que
+    un usuario solo puede leer/escribir datos de su propio tenant — es transparente
+    para el cliente.
+  contact:
+    name: Bloco Sambará
+  license:
+    name: Privado — All Rights Reserved
+    identifier: LicenseRef-Proprietary
+
+servers:
+  - url: https://{projectRef}.supabase.co
+    description: Servidor de producción
+    variables:
+      projectRef:
+        default: your-project-ref
+        description: El project ref de tu proyecto en Supabase
+
+security:
+  - bearerAuth: []
+    apiKey: []
+
+tags:
+  - name: Auth
+    description: Login, signup, sesión y logout
+  - name: Tenants
+    description: Información del tenant (escuela). Solo lectura desde el cliente.
+  - name: Profiles
+    description: Perfiles de usuario (alumnos y profesores)
+
+paths:
+  /auth/v1/signup:
+    post:
+      operationId: auth_signup
+      tags: [Auth]
+      summary: Crear una cuenta nueva
+      description: |
+        Crea un usuario nuevo en `auth.users`. Un trigger en la base de datos
+        crea automáticamente la fila correspondiente en `public.profiles` con
+        `role='student'` y `status='pending'`. El profe debe aprobar la cuenta
+        después.
+      security: [{ apiKey: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: alumno@example.com }
+                password: { type: string, minLength: 6, example: 'una-contraseña' }
+                data:
+                  type: object
+                  description: Metadata custom — leída por el trigger handle_new_auth_user
+                  properties:
+                    name: { type: string, example: 'María Pérez' }
+                    tenant_slug: { type: string, example: 'sambara' }
+      responses:
+        '200':
+          description: Usuario creado con sesión iniciada (si email confirm está OFF)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '422':
+          $ref: '#/components/responses/AuthError'
+
+  /auth/v1/token:
+    post:
+      operationId: auth_login
+      tags: [Auth]
+      summary: Login con email y password
+      description: Devuelve un JWT de acceso y un refresh token.
+      security: [{ apiKey: [] }]
+      parameters:
+        - name: grant_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [password, refresh_token]
+            default: password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400':
+          $ref: '#/components/responses/AuthError'
+
+  /auth/v1/logout:
+    post:
+      operationId: auth_logout
+      tags: [Auth]
+      summary: Cerrar sesión
+      description: Invalida el refresh token actual.
+      responses:
+        '204': { description: Logout exitoso }
+
+  /rest/v1/tenants:
+    get:
+      operationId: tenants_list
+      tags: [Tenants]
+      summary: Buscar tenant por slug
+      description: |
+        Devuelve la config del tenant. Pública (sin login) — necesaria para
+        renderizar el branding antes de que el usuario haga login.
+      security: [{ apiKey: [] }]
+      parameters:
+        - name: slug
+          in: query
+          required: true
+          description: 'Filtrar por slug. Sintaxis PostgREST: `slug=eq.<value>`'
+          schema: { type: string, example: 'eq.sambara' }
+        - name: select
+          in: query
+          schema: { type: string, default: '*' }
+      responses:
+        '200':
+          description: Lista de tenants matching (idealmente 0 o 1)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Tenant' }
+
+  /rest/v1/profiles:
+    get:
+      operationId: profiles_list
+      tags: [Profiles]
+      summary: Listar perfiles del tenant
+      description: |
+        Devuelve los perfiles. RLS filtra automáticamente: cada usuario ve solo los
+        perfiles de su tenant.
+      parameters:
+        - name: select
+          in: query
+          schema: { type: string, default: '*' }
+        - name: id
+          in: query
+          schema: { type: string, example: 'eq.<uuid>' }
+        - name: role
+          in: query
+          schema: { type: string, example: 'eq.student' }
+      responses:
+        '200':
+          description: Lista de perfiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Profile' }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      operationId: profiles_update
+      tags: [Profiles]
+      summary: Actualizar perfil propio o de un alumno (si sos profe)
+      description: |
+        - El usuario puede actualizar su propio perfil.
+        - Si tiene `role='teacher'` o `role='both'`, puede actualizar perfiles
+          de otros alumnos del mismo tenant (ej. asignar nivel, cambiar status).
+        - RLS bloquea cualquier intento de tocar perfiles de otros tenants.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: string, example: 'eq.<uuid>' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                phone: { type: string }
+                avatar_url: { type: string, format: uri }
+                level: { $ref: '#/components/schemas/Level' }
+                status: { $ref: '#/components/schemas/UserStatus' }
+      responses:
+        '204': { description: Actualizado correctamente }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT devuelto por `/auth/v1/token`. Header: `Authorization: Bearer <token>`.
+    apiKey:
+      type: apiKey
+      name: apikey
+      in: header
+      description: |
+        La anon key del proyecto Supabase. Header: `apikey: <anon_key>`.
+        Es pública por diseño — RLS hace cumplir los permisos reales.
+
+  schemas:
+    Level:
+      type: string
+      enum: [iniciacion, intermedio, bloco]
+      description: |
+        Nivel jerárquico del alumno. Cascada de visibilidad de contenido:
+        - iniciacion → solo ve iniciación
+        - intermedio → ve intermedio + iniciación
+        - bloco → ve todo
+
+    UserRole:
+      type: string
+      enum: [teacher, student, both]
+
+    UserStatus:
+      type: string
+      enum: [active, pending, inactive]
+
+    BrandColors:
+      type: object
+      description: Paleta del tenant. Cada valor es 'R G B' (sin coma) como string.
+      properties:
+        '50': { type: string, example: '253 242 248' }
+        '100': { type: string, example: '252 231 243' }
+        '200': { type: string, example: '251 207 232' }
+        '300': { type: string, example: '249 168 212' }
+        '400': { type: string, example: '232 121 173' }
+        '500': { type: string, example: '194 57 140' }
+        '600': { type: string, example: '168 40 118' }
+        '700': { type: string, example: '138 31 96' }
+        '800': { type: string, example: '111 26 77' }
+        '900': { type: string, example: '90 22 62' }
+      required: ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900']
+
+    Tenant:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string, example: sambara }
+        name: { type: string, example: 'Bloco Sambará' }
+        logo_url:
+          type: [string, 'null']
+          format: uri
+        brand_colors:
+          oneOf:
+            - $ref: '#/components/schemas/BrandColors'
+            - type: 'null'
+        config:
+          type: [object, 'null']
+          additionalProperties: true
+        created_at: { type: string, format: date-time }
+      required: [id, slug, name, created_at]
+
+    Profile:
+      type: object
+      properties:
+        id: { type: string, format: uuid, description: 'Igual al auth.users.id' }
+        tenant_id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+        phone:
+          type: [string, 'null']
+        avatar_url:
+          type: [string, 'null']
+          format: uri
+        role: { $ref: '#/components/schemas/UserRole' }
+        level:
+          oneOf:
+            - $ref: '#/components/schemas/Level'
+            - type: 'null'
+        status: { $ref: '#/components/schemas/UserStatus' }
+        join_date: { type: string, format: date }
+        created_at: { type: string, format: date-time }
+      required: [id, tenant_id, email, name, role, status, join_date, created_at]
+
+    AuthResponse:
+      type: object
+      properties:
+        access_token: { type: string, description: 'JWT — vencimiento típico 1h' }
+        token_type: { type: string, example: bearer }
+        expires_in: { type: integer, example: 3600 }
+        refresh_token: { type: string }
+        user:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            email: { type: string, format: email }
+            user_metadata: { type: object, additionalProperties: true }
+
+    ErrorResponse:
+      type: object
+      properties:
+        code: { type: integer, example: 400 }
+        msg: { type: string, example: 'invalid credentials' }
+        error_code: { type: string, example: invalid_credentials }
+
+  responses:
+    Unauthorized:
+      description: JWT inválido o ausente
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Forbidden:
+      description: RLS te bloqueó esta operación
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    AuthError:
+      description: Error de autenticación
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
