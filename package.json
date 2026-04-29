@@ -34,9 +34,9 @@
     ]
   },
   "dependencies": {
-    "@scalar/api-reference-react": "^0.9.29",
+    "@scalar/api-reference-react": "^0.9.30",
     "@supabase/supabase-js": "^2.45.4",
-    "lucide-react": "^0.453.0",
+    "lucide-react": "^0.577.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.1",
@@ -61,7 +61,7 @@
     "eslint": "^9.12.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.26",
+    "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^15.15.0",
     "husky": "^9.1.7",
     "jsdom": "^29.1.0",
