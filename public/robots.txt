@@ -1,0 +1,4 @@
+# App privada — no indexar.
+# Cuando haya página pública (landing, marketing) se relaja por sección.
+User-agent: *
+Disallow: /

@@ -1,14 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Tenant, BrandColors, BrandShade } from '@/types/database';
-
-interface TenantContextValue {
-  tenant: Tenant | null;
-  loading: boolean;
-  error: string | null;
-}
-
-const TenantContext = createContext<TenantContextValue | undefined>(undefined);
+import { TenantContext } from './tenantContext';
 
 const DEFAULT_BRAND: BrandColors = {
   50: '253 242 248',
@@ -73,10 +66,4 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ tenant, loading, error }), [tenant, loading, error]);
 
   return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;
-}
-
-export function useTenant() {
-  const ctx = useContext(TenantContext);
-  if (!ctx) throw new Error('useTenant debe usarse dentro de TenantProvider');
-  return ctx;
 }

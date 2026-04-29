@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Pill } from '@/components/ui/Pill';
 import { PageContent } from '@/components/layout/PageContent';
-import { useAuth } from '@/features/auth/AuthProvider';
+import { useAuth } from '@/features/auth/useAuth';
 import { useActiveRole } from '@/features/auth/useActiveRole';
 import { useRoleStore } from '@/stores/roleStore';
 import { cn } from '@/lib/cn';

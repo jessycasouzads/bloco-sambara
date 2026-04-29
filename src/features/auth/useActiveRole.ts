@@ -1,4 +1,4 @@
-import { useAuth } from './AuthProvider';
+import { useAuth } from './useAuth';
 import { useRoleStore, type ActiveRole } from '@/stores/roleStore';
 
 interface ActiveRoleResult {

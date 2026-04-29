@@ -2,8 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { useAuth } from '@/features/auth/AuthProvider';
-import { useTenant } from '@/features/tenant/TenantProvider';
+import { useAuth } from '@/features/auth/useAuth';
+import { useTenant } from '@/features/tenant/useTenant';
 
 export function LoginPage() {
   const { session, signIn } = useAuth();

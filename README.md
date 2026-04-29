@@ -63,7 +63,23 @@ VITE_DEFAULT_TENANT_SLUG=sambara
 
 > ⚠️ `.env.local` está gitignoreado. **Nunca** commitees claves reales.
 
-### 6. Crear el primer usuario (Jess, profe)
+### 6. Configurar Auth en Supabase
+
+En el dashboard, **Authentication → Providers → Email** y **Authentication → URL Configuration**:
+
+**Email confirmation** — decidí entre dos modos según tu caso:
+
+| Modo | Cuándo | Cómo |
+|------|--------|------|
+| **Cerrado (recomendado para Sambará)** | El profe da de alta los alumnos. No hay self-signup público. | En **Authentication → Sign In / Providers → Email**, desactivá "Confirm email". Los users que cree el profe entran directamente. |
+| **Abierto con confirmación** | Cuando habilites pre-inscripción desde la app. | Dejá "Confirm email" activo y configurá un SMTP custom (Resend, SendGrid) en **Project Settings → Auth → SMTP**. Sin SMTP custom, los emails de Supabase llegan al spam o tienen rate limits muy bajos. |
+
+**URL Configuration** — esto es crítico para que el login funcione en producción:
+
+- **Site URL**: la URL de tu app (en local `http://localhost:5173`, en prod la de Vercel)
+- **Redirect URLs**: agregá tanto la local como la de producción + `/**` (ej. `https://tu-app.vercel.app/**`)
+
+### 7. Crear el primer usuario (Jess, profe)
 
 En el dashboard de Supabase: **Authentication → Users → Add user → Create new user**
 
@@ -80,7 +96,7 @@ update public.profiles
  where email = 'tu@email.com';
 ```
 
-### 7. Levantar la app
+### 8. Levantar la app
 
 ```bash
 npm run dev

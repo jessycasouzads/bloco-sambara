@@ -4,9 +4,9 @@ import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Pill } from '@/components/ui/Pill';
 import { PageContent } from '@/components/layout/PageContent';
-import { useAuth } from '@/features/auth/AuthProvider';
+import { useAuth } from '@/features/auth/useAuth';
 import { useActiveRole } from '@/features/auth/useActiveRole';
-import { useTenant } from '@/features/tenant/TenantProvider';
+import { useTenant } from '@/features/tenant/useTenant';
 
 export function HomePage() {
   const { profile } = useAuth();

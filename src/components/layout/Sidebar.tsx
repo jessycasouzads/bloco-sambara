@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { useAuth } from '@/features/auth/AuthProvider';
+import { useAuth } from '@/features/auth/useAuth';
 import { useActiveRole } from '@/features/auth/useActiveRole';
-import { useTenant } from '@/features/tenant/TenantProvider';
+import { useTenant } from '@/features/tenant/useTenant';
 import { Avatar } from '@/components/ui/Avatar';
 import { Pill } from '@/components/ui/Pill';
 import { getNavItems } from './navConfig';
