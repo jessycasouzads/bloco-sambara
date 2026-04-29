@@ -9,14 +9,14 @@ Camino claro a apps nativas iOS/Android en el futuro vía [Capacitor](https://ca
 
 ## Stack
 
-| Capa | Tecnología |
-|------|-----------|
-| UI | React 18 + Vite + TypeScript |
+| Capa    | Tecnología                                       |
+| ------- | ------------------------------------------------ |
+| UI      | React 18 + Vite + TypeScript                     |
 | Estilos | Tailwind CSS (tokens de marca via CSS variables) |
-| Routing | React Router v6 |
-| Forms | React Hook Form + Zod |
-| Iconos | lucide-react |
-| Backend | Supabase (Auth + Postgres + Storage + RLS) |
+| Routing | React Router v6                                  |
+| Forms   | React Hook Form + Zod                            |
+| Iconos  | lucide-react                                     |
+| Backend | Supabase (Auth + Postgres + Storage + RLS)       |
 
 ---
 
@@ -69,10 +69,10 @@ En el dashboard, **Authentication → Providers → Email** y **Authentication �
 
 **Email confirmation** — decidí entre dos modos según tu caso:
 
-| Modo | Cuándo | Cómo |
-|------|--------|------|
-| **Cerrado (recomendado para Sambará)** | El profe da de alta los alumnos. No hay self-signup público. | En **Authentication → Sign In / Providers → Email**, desactivá "Confirm email". Los users que cree el profe entran directamente. |
-| **Abierto con confirmación** | Cuando habilites pre-inscripción desde la app. | Dejá "Confirm email" activo y configurá un SMTP custom (Resend, SendGrid) en **Project Settings → Auth → SMTP**. Sin SMTP custom, los emails de Supabase llegan al spam o tienen rate limits muy bajos. |
+| Modo                                   | Cuándo                                                       | Cómo                                                                                                                                                                                                    |
+| -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cerrado (recomendado para Sambará)** | El profe da de alta los alumnos. No hay self-signup público. | En **Authentication → Sign In / Providers → Email**, desactivá "Confirm email". Los users que cree el profe entran directamente.                                                                        |
+| **Abierto con confirmación**           | Cuando habilites pre-inscripción desde la app.               | Dejá "Confirm email" activo y configurá un SMTP custom (Resend, SendGrid) en **Project Settings → Auth → SMTP**. Sin SMTP custom, los emails de Supabase llegan al spam o tienen rate limits muy bajos. |
 
 **URL Configuration** — esto es crítico para que el login funcione en producción:
 
@@ -108,13 +108,19 @@ Abrir http://localhost:5173 — login con el email/password creado.
 
 ## Scripts
 
-| Comando | Qué hace |
-|---------|----------|
-| `npm run dev` | Dev server con HMR |
-| `npm run build` | Typecheck + build de producción a `dist/` |
-| `npm run preview` | Servir el build local (validar antes de deploy) |
-| `npm run typecheck` | Solo TypeScript, sin emit |
-| `npm run lint` | ESLint |
+| Comando                | Qué hace                                              |
+| ---------------------- | ----------------------------------------------------- |
+| `npm run dev`          | Dev server con HMR                                    |
+| `npm run build`        | Typecheck + build de producción a `dist/`             |
+| `npm run preview`      | Servir el build local (validar antes de deploy)       |
+| `npm run typecheck`    | TypeScript en todo el proyecto (incluye references)   |
+| `npm run lint`         | ESLint                                                |
+| `npm run format`       | Prettier — formatea todos los archivos                |
+| `npm run format:check` | Prettier solo verifica (no escribe). Lo que corre CI. |
+
+### Pre-commit hook
+
+Husky + lint-staged corren ESLint + Prettier solo sobre los archivos staged en cada commit. Si algo falla, el commit se aborta. Para emergencias se puede saltear con `git commit --no-verify`, pero CI igual va a frenarlo.
 
 ---
 

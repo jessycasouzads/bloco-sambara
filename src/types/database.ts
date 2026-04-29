@@ -10,7 +10,17 @@ export type Level = 'iniciacion' | 'intermedio' | 'bloco';
 export type UserRole = 'teacher' | 'student' | 'both';
 export type UserStatus = 'active' | 'pending' | 'inactive';
 
-export type BrandShade = '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+export type BrandShade =
+  | '50'
+  | '100'
+  | '200'
+  | '300'
+  | '400'
+  | '500'
+  | '600'
+  | '700'
+  | '800'
+  | '900';
 export type BrandColors = Record<BrandShade, string>;
 
 export interface Tenant {

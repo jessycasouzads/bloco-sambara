@@ -1,0 +1,16 @@
+# Forzar LF para todos los archivos de texto, en cualquier OS.
+# Prettier y .editorconfig esperan LF — esto evita que Windows
+# inyecte CRLF al hacer checkout/commit.
+* text=auto eol=lf
+
+# Binary files explícitos (no tocar)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

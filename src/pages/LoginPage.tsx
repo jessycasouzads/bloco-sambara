@@ -42,11 +42,7 @@ export function LoginPage() {
           <p className="mt-2 text-sm text-white/80">Entrá a tu cuenta para continuar</p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-card bg-white p-6 shadow-card"
-          noValidate
-        >
+        <form onSubmit={handleSubmit} className="rounded-card bg-white p-6 shadow-card" noValidate>
           <div className="space-y-4">
             <Input
               label="Email"

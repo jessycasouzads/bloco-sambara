@@ -1,0 +1,19 @@
+node_modules
+dist
+build
+coverage
+.vitest-cache
+.vercel
+.next
+playwright-report
+test-results
+*.lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Generados
+*.tsbuildinfo
+
+# El proto HTML original — fuera del scope de Prettier
+sambara-app.html

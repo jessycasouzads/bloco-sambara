@@ -16,7 +16,18 @@ const DEFAULT_BRAND: BrandColors = {
   900: '90 22 62',
 };
 
-const SHADES: readonly BrandShade[] = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+const SHADES: readonly BrandShade[] = [
+  '50',
+  '100',
+  '200',
+  '300',
+  '400',
+  '500',
+  '600',
+  '700',
+  '800',
+  '900',
+];
 
 function applyBrandColors(colors: BrandColors) {
   const root = document.documentElement;

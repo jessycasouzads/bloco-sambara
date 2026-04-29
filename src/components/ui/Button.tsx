@@ -14,14 +14,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<Variant, string> = {
-  primary:
-    'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 disabled:bg-brand-300',
+  primary: 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 disabled:bg-brand-300',
   secondary:
     'bg-brand-50 text-brand-700 hover:bg-brand-100 active:bg-brand-200 disabled:opacity-50',
-  ghost:
-    'bg-transparent text-brand-700 hover:bg-brand-50 active:bg-brand-100 disabled:opacity-50',
-  danger:
-    'bg-danger text-white hover:opacity-90 active:opacity-80 disabled:opacity-50',
+  ghost: 'bg-transparent text-brand-700 hover:bg-brand-50 active:bg-brand-100 disabled:opacity-50',
+  danger: 'bg-danger text-white hover:opacity-90 active:opacity-80 disabled:opacity-50',
 };
 
 const sizes: Record<Size, string> = {
@@ -31,7 +28,18 @@ const sizes: Record<Size, string> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', fullWidth, leftIcon, rightIcon, loading, className, disabled, children, ...rest },
+  {
+    variant = 'primary',
+    size = 'md',
+    fullWidth,
+    leftIcon,
+    rightIcon,
+    loading,
+    className,
+    disabled,
+    children,
+    ...rest
+  },
   ref,
 ) {
   return (

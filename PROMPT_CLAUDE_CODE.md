@@ -13,9 +13,11 @@ El color de marca oficial es **fucsia (#a82876 / #c2398c)** y la estética debe 
 La app tiene **dos roles** con permisos y vistas distintas:
 
 ### 1. Profesor
+
 Gestiona toda la operativa de la escuela: alumnos, clases, asistencia, recuperaciones, eventos, contenido multimedia, tienda y finanzas.
 
 ### 2. Alumno
+
 Consume contenido y gestiona su propia participación: ve sus clases, confirma asistencia, gestiona recuperaciones, accede a multimedia según su nivel, ve eventos y compra merchandising.
 
 Una persona puede tener uno o ambos roles. Si tiene ambos, debe poder cambiar entre ellos desde el menú.
@@ -31,6 +33,7 @@ La escuela tiene **3 niveles jerárquicos**:
 3. **Bloco** (nivel avanzado)
 
 **Regla crítica de visibilidad de contenido multimedia:**
+
 - Iniciación → solo ve contenido de Iniciación
 - Intermedio → ve contenido de Intermedio **+ Iniciación**
 - Bloco → ve contenido de Bloco **+ Intermedio + Iniciación**
@@ -42,6 +45,7 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 ## Modelo de datos (entidades principales)
 
 ### User
+
 - `id`, `name`, `email`, `phone`, `avatarUrl`
 - `role`: `'teacher' | 'student' | 'both'`
 - `level`: `'iniciacion' | 'intermedio' | 'bloco'` (solo para alumnos)
@@ -50,24 +54,28 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 - `joinDate`
 
 ### ClassSchedule (clase recurrente)
+
 - `id`, `name` (ej: "Lunes Intermedio")
 - `level`: `'iniciacion' | 'intermedio' | 'bloco'`
 - `dayOfWeek`, `startTime`, `endTime`, `location`
 - `capacity`, `enrolledStudents[]`
 
 ### ClassSession (instancia concreta de una clase)
+
 - `id`, `classScheduleId`, `date`
 - `status`: `'scheduled' | 'in-progress' | 'completed' | 'cancelled'`
 - `teacherNotes` (qué se va a trabajar)
 - `attendance[]`: lista de `{ userId, status: 'present' | 'absent' | 'recovering', isRecovery }`
 
 ### RecoveryClass (clase a recuperar)
+
 - `id`, `userId`, `originalSessionId`
 - `status`: `'pending' | 'recovered' | 'expired'`
 - `expiresAt` (típicamente fin del mes siguiente a la falta)
 - `recoveredInSessionId` (si ya se recuperó)
 
 ### Event (evento/show)
+
 - `id`, `title`, `description`, `coverImageUrl`
 - `date`, `time`, `location`
 - `levelsInvited[]`: niveles que pueden asistir
@@ -77,6 +85,7 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 - `status`: `'draft' | 'published' | 'past'`
 
 ### MediaContent (video/audio/PDF)
+
 - `id`, `title`, `type`: `'video' | 'audio' | 'pdf' | 'image'`
 - `folderId` (Avenida, Forrodum, Michael Jackson, Reggae, Partituras, etc.)
 - `fileUrl`, `thumbnailUrl`, `durationSeconds`, `fileSize`
@@ -85,17 +94,20 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 - `uploadedBy`, `uploadedAt`
 
 ### Product (merchandising)
+
 - `id`, `name`, `description`, `imageUrl`
 - `price`, `stock`, `variants[]` (talles, colores)
 - `status`: `'available' | 'pre-sale' | 'discontinued'`
 - `availableUntil` (para pre-ventas)
 
 ### Order
+
 - `id`, `userId`, `items[]`: `{ productId, variant, quantity, price }`
 - `total`, `paymentMethod`: `'balance' | 'cash' | 'transfer'`
 - `status`: `'pending' | 'paid' | 'delivered' | 'cancelled'`
 
 ### Transaction (movimiento de saldo)
+
 - `id`, `userId`, `amount` (positivo = ingreso, negativo = cargo)
 - `type`: `'monthly_fee' | 'fee_payment' | 'product_purchase' | 'adjustment'`
 - `description`, `relatedClassScheduleId`, `relatedOrderId`
@@ -106,6 +118,7 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 ## Reglas de negocio críticas
 
 ### Recuperación de clases
+
 1. Cuando un alumno falta a una clase (marcado como `'absent'` por el profe en attendance), se genera automáticamente un `RecoveryClass` pendiente.
 2. El alumno puede recuperar viniendo a otra clase **del mismo nivel o un nivel inferior** dentro del período de validez (típicamente hasta fin del mes siguiente).
 3. Para recuperar, el alumno **confirma asistencia** a una clase disponible. Esa clase la cuenta como recuperación.
@@ -113,6 +126,7 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 5. Si la fecha de expiración pasa sin recuperar, queda como `'expired'`.
 
 ### Cuotas
+
 1. Se cobra una cuota mensual por nivel (configurable, por defecto €40).
 2. El día 1 de cada mes se genera una `Transaction` negativa por la cuota.
 3. El alumno paga (en clase, Bizum, transferencia) y el profe registra el ingreso → `Transaction` positiva.
@@ -120,10 +134,12 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 5. Si saldo < 0, aparece como "atrasado" en la vista del profe.
 
 ### Visibilidad de multimedia
+
 - Al hacer query, filtrar `MediaContent` donde `minimumLevel` sea ≤ que el nivel del usuario en el orden Iniciación(0) < Intermedio(1) < Bloco(2).
 - Mostrar contenido bloqueado de niveles superiores con icono de candado y CTA opcional "subí de nivel para acceder".
 
 ### Inscripciones nuevas
+
 - Un alumno se puede pre-inscribir desde la app (formulario simple).
 - El profe ve solicitudes pendientes en el home (badge "3 solicitudes de inscripción").
 - Aprueba/rechaza, asigna nivel y clase regular.
@@ -133,11 +149,13 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 ## Pantallas necesarias
 
 ### Onboarding
+
 - **Login** (email + password, branding fucsia, decoración con círculos)
 - **Selector de rol** (si la persona tiene ambos)
 - **Olvido de contraseña** (flujo básico)
 
 ### Profesor
+
 - **Home**: KPIs (alumnos totales, clases/sem, ingresos del mes), clase de hoy con CTA "pasar lista", pendientes (solicitudes, cuotas atrasadas, drafts), acciones rápidas
 - **Lista de alumnos**: filtros por nivel y estado, búsqueda, chips de estado de pago, tarjeta destacada para "inscripciones pendientes"
 - **Ficha de alumno**: avatar, datos, KPIs (asistencias, recuperaciones, saldo), tabs (historial, pagos, notas), acciones (mensaje, subir nivel, cobrar)
@@ -151,6 +169,7 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 - **Finanzas**: cobrado del mes, gráfico de barras últimos 6 meses, lista de cuotas atrasadas con CTA "recordar", movimientos recientes
 
 ### Alumno
+
 - **Home**: próxima clase con CTAs confirmar/no voy, banner de recuperaciones pendientes si las hay, carousel horizontal de multimedia nueva, tarjeta de próximo evento
 - **Mis clases**: banner de recuperaciones, lista de próximas, sección "a recuperar" con marcas visuales
 - **Detalle de clase**: info, notas del profe, material recomendado para repasar, CTAs voy/no voy
@@ -163,6 +182,7 @@ Esta cascada se aplica automáticamente al subir contenido: el profesor seleccio
 - **Mi cuenta**: avatar, datos, **saldo y próxima cuota**, lista de movimientos, accesos rápidos (tienda, pedidos, mensajes, notificaciones), cerrar sesión
 
 ### Compartido
+
 - **Drawer lateral**: navegación completa, perfil, ajustes, cambio de rol, cerrar sesión
 - **Tab bar inferior**: 5 tabs distintos según rol
 

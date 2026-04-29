@@ -8,20 +8,20 @@ export interface NavItem {
 }
 
 const teacherNav: NavItem[] = [
-  { to: '/',           label: 'Inicio',     Icon: Home },
-  { to: '/alumnos',    label: 'Alumnos',    Icon: Users },
-  { to: '/clases',     label: 'Clases',     Icon: Calendar },
-  { to: '/eventos',    label: 'Eventos',    Icon: Sparkles },
-  { to: '/multimedia', label: 'Media',      Icon: Music },
-  { to: '/cuenta',     label: 'Cuenta',     Icon: UserIcon },
+  { to: '/', label: 'Inicio', Icon: Home },
+  { to: '/alumnos', label: 'Alumnos', Icon: Users },
+  { to: '/clases', label: 'Clases', Icon: Calendar },
+  { to: '/eventos', label: 'Eventos', Icon: Sparkles },
+  { to: '/multimedia', label: 'Media', Icon: Music },
+  { to: '/cuenta', label: 'Cuenta', Icon: UserIcon },
 ];
 
 const studentNav: NavItem[] = [
-  { to: '/',           label: 'Inicio',     Icon: Home },
-  { to: '/clases',     label: 'Mis clases', Icon: Calendar },
-  { to: '/multimedia', label: 'Media',      Icon: Music },
-  { to: '/eventos',    label: 'Eventos',    Icon: Sparkles },
-  { to: '/cuenta',     label: 'Cuenta',     Icon: UserIcon },
+  { to: '/', label: 'Inicio', Icon: Home },
+  { to: '/clases', label: 'Mis clases', Icon: Calendar },
+  { to: '/multimedia', label: 'Media', Icon: Music },
+  { to: '/eventos', label: 'Eventos', Icon: Sparkles },
+  { to: '/cuenta', label: 'Cuenta', Icon: UserIcon },
 ];
 
 export function getNavItems(role: ActiveRole): NavItem[] {

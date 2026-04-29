@@ -9,22 +9,24 @@
    toda la UI cambia de color sin tocar componentes.
    ============================================================ */
 :root {
-  --brand-50:  253 242 248;
+  --brand-50: 253 242 248;
   --brand-100: 252 231 243;
   --brand-200: 251 207 232;
   --brand-300: 249 168 212;
   --brand-400: 232 121 173;
-  --brand-500: 194  57 140;
-  --brand-600: 168  40 118;
-  --brand-700: 138  31  96;
-  --brand-800: 111  26  77;
-  --brand-900:  90  22  62;
+  --brand-500: 194 57 140;
+  --brand-600: 168 40 118;
+  --brand-700: 138 31 96;
+  --brand-800: 111 26 77;
+  --brand-900: 90 22 62;
 
   color-scheme: light;
 }
 
 @layer base {
-  html, body, #root {
+  html,
+  body,
+  #root {
     height: 100%;
   }
 
@@ -33,17 +35,30 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 
   /* iOS safe areas: respetar notch / home indicator cuando vayamos a Capacitor */
-  .safe-top    { padding-top: env(safe-area-inset-top); }
-  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 @layer utilities {
   /* Scroll horizontal sin scrollbar (carousels) */
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
 }
